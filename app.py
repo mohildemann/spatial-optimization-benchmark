@@ -1,3 +1,4 @@
+# Imports
 import os
 import dash
 import dash_core_components as dcc
@@ -16,6 +17,7 @@ from plot_functions import plot_selected_watersheds, \
     swc_allocation_create_background_map,\
     swc_allocation_layout, plot_selected_landuse_map
 
+# Classes
 class Solution:
 
     _id = 0
@@ -26,10 +28,7 @@ class Solution:
         self.representation = representation
         self.objective_values = objective_values
 
-dash_app = dash.Dash(__name__, external_stylesheets=[dbc.themes.DARKLY])
-app = dash_app.server
-dash_app.title = "Title to be defined"
-
+#defs
 def blank_figure():
     fig = go.Figure(go.Scatter(x=[], y=[]))
     fig.update_layout(template=None)
@@ -53,7 +52,7 @@ def create_layout():
                 ],
             ),
             html.Div(
-                id="dash_app-container",
+                id="app-container",
                 children=[
                     html.Div(
                         id="left-column",
@@ -132,7 +131,7 @@ def create_layout():
         ],
     )
 
-def interactiveParetoFront(dash_app, problems, save_front = None):
+    def interactiveParetoFront(dash_app, problems, save_front = None):
 
     def generate_figure_image(figure, points,layout, opacity):
         figure.add_trace(go.Scatter(
@@ -288,22 +287,22 @@ def interactiveParetoFront(dash_app, problems, save_front = None):
                 pass
         return {}
 
-# inititalize the dash_app
-# dash_app = dash.Dash(
-#     __name__,
-#     meta_tags=[
-#         {"name": "viewport", "content": "width=device-width, initial-scale=1.0"}
-#     ],
-# )
+# Initialize dash app
+dash_app = dash.Dash(__name__, external_stylesheets=[dbc.themes.DARKLY])
 
-#create the layout
+app = dash_app.server
+
+#dash_app.title = "Interactive paretofront"
+
 dash_app.layout = create_layout()
+
+## Main function start
 
 #define location of output directory with pareto fronts and required input data for visualizations
 filename = 'all_gens_gumobila_200_gens_100_popsize_fixed_index.pkl'
 
 with open(os.path.join("data", filename), 'rb') as handle:
-        populations = pickle.load(handle)
+    populations = pickle.load(handle)
 
 with open(os.path.join("data",'watersheds4326.geojson')) as watersheds_json_file:
     watersheds = json.load(watersheds_json_file)
@@ -348,7 +347,7 @@ swc_allocation_problem = Problem(
     plot_function_additional_trace= plot_selected_contourlines)
 
 # #problem 2
-with open(r"data\pareto_front.pkl", 'rb') as output:
+with open(os.path.join("data", "pareto_front.pkl"), 'rb') as output:
     pf_comola = pickle.load(output)
 optimal_solutions_comola = []
 for i in range(len(pf_comola[2])):
@@ -379,5 +378,8 @@ comola_problem = Problem(
 problems = [swc_allocation_problem, comola_problem]
 
 interactiveParetoFront(dash_app, problems)
+
+## Main function end
+
 if __name__ == '__main__':
     dash_app.run_server(debug=True)
