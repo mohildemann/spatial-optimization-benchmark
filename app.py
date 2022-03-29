@@ -131,7 +131,7 @@ def create_layout():
         ],
     )
 
-    def interactiveParetoFront(dash_app, problems, save_front = None):
+def interactiveParetoFront(dash_app, problems, save_front = None):
 
     def generate_figure_image(figure, points,layout, opacity):
         figure.add_trace(go.Scatter(
